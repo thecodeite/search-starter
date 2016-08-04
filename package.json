@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "env:kafka:local": "export KAFKA_ADDRESS=kafka.dev:2181",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "kafka-node": "^0.5.2",
-    "request": "^2.74.0"
+    "request-promise": "^4.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.0"
   }
 }

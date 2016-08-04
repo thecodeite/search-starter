@@ -1,25 +1,21 @@
-const bus = require('./bus')
-const request = require('request')
+const requestp = require('request-promise')
+require('./pipeline')(
+  'elasticSearchQuery',
+  'elasticSearchResult',
+  {transform}
+)
 
-bus('elasticSearchQuery')
-  .then(({producer, consumer}) => {
-    consumer.on('message', (message) => {
-      console.log('search query received:', message)
+function transform ({data}) {
+  console.log('data:', data)
 
-      const options = {
-        uri: 'http://elastic.dev:9200/dis-local/_search',
-        body: JSON.parse(message.value),
-        json: true,
-        method: 'POST'
-      }
-
-      request(options, (err, res, body) => {
-        const payloads = [{ topic: 'elasticSearchResult', messages: JSON.stringify(body.hits.hits.map(h => h._source.headline)) }]
-        console.log('paylod', payloads)
-        producer.send(payloads, function (err, data) {
-          console.log('error:', err)
-          console.log('queryExecutor sent message:', data);
-        });
-      })
-    })
-  })
+  const options = {
+    uri: 'http://elastic.dev:9200/dis-local/intelligence/_search',
+    body: JSON.parse(data),
+    json: true,
+    method: 'POST'
+  }
+  console.log('starting elastic search query')
+  return requestp(options)
+    .then(body => JSON.stringify(body.hits.hits.map(h => h._source.headline)))
+    .catch(err => console.err('elasticsearch error:', err))
+}
